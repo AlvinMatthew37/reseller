@@ -37,6 +37,7 @@ export interface VendorInput {
 
 export interface MenuItemInput {
   name: string
+  description: string
   price: number
   imagePath: string | null
 }

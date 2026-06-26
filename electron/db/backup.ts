@@ -27,6 +27,7 @@ type BackupMenuItemRow = {
   id: string
   vendor_id: string
   name: string
+  description: string
   price: number
   image_path: string | null
   image: BackupMenuImage | null
@@ -78,7 +79,7 @@ type BackupRestoreResult = BackupOperationResult & {
   importedAt: string
 }
 
-const BACKUP_VERSION = 1
+const BACKUP_VERSION = 2
 
 function assertBrowserWindow(browserWindow: BrowserWindow | null): BrowserWindow {
   if (!browserWindow) {
@@ -139,7 +140,7 @@ function readJsonBackup(filePath: string): BackupPayload {
   const rawText = readTextFile(filePath)
   const parsed = JSON.parse(rawText) as Partial<BackupPayload>
 
-  if (!parsed || parsed.version !== BACKUP_VERSION) {
+  if (!parsed || (parsed.version !== BACKUP_VERSION && parsed.version !== 1)) {
     throw new Error('This backup file is not compatible with the current app version.')
   }
 
@@ -172,7 +173,7 @@ function getBackupPayload(): BackupPayload {
   const rawMenuItems = db
     .prepare(
       `
-        SELECT id, vendor_id, name, price, image_path, status, created_at, updated_at
+        SELECT id, vendor_id, name, description, price, image_path, status, created_at, updated_at
         FROM menu_items
         ORDER BY created_at ASC
       `,
@@ -263,7 +264,7 @@ function restoreBackupPayload(payload: BackupPayload) {
       db.prepare(
         `
           INSERT INTO vendors (id, name, type, location, phone_number, status, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
       ).run(
         vendor.id,
@@ -295,13 +296,14 @@ function restoreBackupPayload(payload: BackupPayload) {
 
       db.prepare(
         `
-          INSERT INTO menu_items (id, vendor_id, name, price, image_path, status, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO menu_items (id, vendor_id, name, description, price, image_path, status, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
       ).run(
         menuItem.id,
         menuItem.vendor_id,
         menuItem.name,
+        menuItem.description ?? '',
         menuItem.price,
         importedImagePath,
         menuItem.status,
@@ -440,7 +442,7 @@ export async function exportMenusCsv(browserWindow: BrowserWindow | null): Promi
   const rows = db
     .prepare(
       `
-        SELECT id, vendor_id, name, price, image_path, status, created_at, updated_at
+        SELECT id, vendor_id, name, description, price, image_path, status, created_at, updated_at
         FROM menu_items
         ORDER BY created_at ASC
       `,
@@ -462,6 +464,7 @@ export async function exportMenusCsv(browserWindow: BrowserWindow | null): Promi
       'id',
       'vendor_id',
       'name',
+      'description',
       'price',
       'image_path',
       'status',
@@ -473,6 +476,7 @@ export async function exportMenusCsv(browserWindow: BrowserWindow | null): Promi
         row.id,
         row.vendor_id,
         row.name,
+        row.description,
         row.price,
         row.image_path,
         row.status,

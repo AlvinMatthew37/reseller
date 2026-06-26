@@ -5,6 +5,7 @@ function mapMenuItemRow(row) {
         id: row.id,
         vendorId: row.vendor_id,
         name: row.name,
+        description: row.description,
         price: row.price,
         imagePath: row.image_path,
         status: row.status,
@@ -22,6 +23,7 @@ function getMenuItemOrThrow(menuItemId) {
 function normalizeMenuItemInput(input) {
     return {
         name: input.name.trim(),
+        description: input.description.trim(),
         price: Number(input.price),
         imagePath: input.imagePath?.trim() ? input.imagePath.trim() : null,
     };
@@ -29,7 +31,7 @@ function normalizeMenuItemInput(input) {
 export function listMenuItemsByVendor(vendorId) {
     const rows = getDatabase()
         .prepare(`
-        SELECT id, vendor_id, name, price, image_path, status, created_at, updated_at
+        SELECT id, vendor_id, name, description, price, image_path, status, created_at, updated_at
         FROM menu_items
         WHERE vendor_id = ?
         ORDER BY
@@ -42,7 +44,7 @@ export function listMenuItemsByVendor(vendorId) {
 export function getMenuItemById(menuItemId) {
     const row = getDatabase()
         .prepare(`
-        SELECT id, vendor_id, name, price, image_path, status, created_at, updated_at
+        SELECT id, vendor_id, name, description, price, image_path, status, created_at, updated_at
         FROM menu_items
         WHERE id = ?
       `)
@@ -55,10 +57,10 @@ export function createMenuItem(vendorId, input) {
     const now = new Date().toISOString();
     getDatabase()
         .prepare(`
-        INSERT INTO menu_items (id, vendor_id, name, price, image_path, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 'active', ?, ?)
+        INSERT INTO menu_items (id, vendor_id, name, description, price, image_path, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)
       `)
-        .run(menuItemId, vendorId, normalizedInput.name, normalizedInput.price, normalizedInput.imagePath, now, now);
+        .run(menuItemId, vendorId, normalizedInput.name, normalizedInput.description, normalizedInput.price, normalizedInput.imagePath, now, now);
     return getMenuItemOrThrow(menuItemId);
 }
 export function updateMenuItem(menuItemId, input) {
@@ -69,12 +71,13 @@ export function updateMenuItem(menuItemId, input) {
         .prepare(`
         UPDATE menu_items
         SET name = ?,
+            description = ?,
             price = ?,
             image_path = ?,
             updated_at = ?
         WHERE id = ?
       `)
-        .run(normalizedInput.name, normalizedInput.price, normalizedInput.imagePath, now, menuItemId);
+        .run(normalizedInput.name, normalizedInput.description, normalizedInput.price, normalizedInput.imagePath, now, menuItemId);
     return getMenuItemOrThrow(menuItemId);
 }
 export function setMenuItemStatus(menuItemId, status) {

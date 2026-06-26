@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export const REQUIRED_TABLES = [
   'app_meta',
@@ -32,6 +32,7 @@ export const schemaStatements = [
       id TEXT PRIMARY KEY,
       vendor_id TEXT NOT NULL,
       name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
       price REAL NOT NULL,
       image_path TEXT,
       status TEXT NOT NULL CHECK (status IN ('active', 'archived')),

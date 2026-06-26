@@ -3,7 +3,7 @@ import path from 'node:path';
 import { dialog } from 'electron';
 import { getMenuImagesDirectory, writeImportedMenuImage } from '../files/menu-images.js';
 import { getDatabase } from './client.js';
-const BACKUP_VERSION = 1;
+const BACKUP_VERSION = 2;
 function assertBrowserWindow(browserWindow) {
     if (!browserWindow) {
         throw new Error('The application window is not available.');
@@ -52,7 +52,7 @@ function writeTextFile(filePath, content) {
 function readJsonBackup(filePath) {
     const rawText = readTextFile(filePath);
     const parsed = JSON.parse(rawText);
-    if (!parsed || parsed.version !== BACKUP_VERSION) {
+    if (!parsed || (parsed.version !== BACKUP_VERSION && parsed.version !== 1)) {
         throw new Error('This backup file is not compatible with the current app version.');
     }
     if (!Array.isArray(parsed.vendors) ||
@@ -75,7 +75,7 @@ function getBackupPayload() {
         .all();
     const rawMenuItems = db
         .prepare(`
-        SELECT id, vendor_id, name, price, image_path, status, created_at, updated_at
+        SELECT id, vendor_id, name, description, price, image_path, status, created_at, updated_at
         FROM menu_items
         ORDER BY created_at ASC
       `)
@@ -145,7 +145,7 @@ function restoreBackupPayload(payload) {
         for (const vendor of payload.vendors) {
             db.prepare(`
           INSERT INTO vendors (id, name, type, location, phone_number, status, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(vendor.id, vendor.name, vendor.type, vendor.location, vendor.phone_number, vendor.status, vendor.created_at, vendor.updated_at);
         }
         for (const scheduleDay of payload.scheduleDays) {
@@ -160,9 +160,9 @@ function restoreBackupPayload(payload) {
                 importedImagePath = writeImportedMenuImage(menuItem.image.fileName, menuItem.image.base64);
             }
             db.prepare(`
-          INSERT INTO menu_items (id, vendor_id, name, price, image_path, status, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(menuItem.id, menuItem.vendor_id, menuItem.name, menuItem.price, importedImagePath, menuItem.status, menuItem.created_at, menuItem.updated_at);
+          INSERT INTO menu_items (id, vendor_id, name, description, price, image_path, status, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(menuItem.id, menuItem.vendor_id, menuItem.name, menuItem.description ?? '', menuItem.price, importedImagePath, menuItem.status, menuItem.created_at, menuItem.updated_at);
         }
         for (const scheduledVendor of payload.scheduledVendors) {
             db.prepare(`
@@ -264,7 +264,7 @@ export async function exportMenusCsv(browserWindow) {
     const db = getDatabase();
     const rows = db
         .prepare(`
-        SELECT id, vendor_id, name, price, image_path, status, created_at, updated_at
+        SELECT id, vendor_id, name, description, price, image_path, status, created_at, updated_at
         FROM menu_items
         ORDER BY created_at ASC
       `)
@@ -282,6 +282,7 @@ export async function exportMenusCsv(browserWindow) {
             'id',
             'vendor_id',
             'name',
+            'description',
             'price',
             'image_path',
             'status',
@@ -292,6 +293,7 @@ export async function exportMenusCsv(browserWindow) {
             row.id,
             row.vendor_id,
             row.name,
+            row.description,
             row.price,
             row.image_path,
             row.status,

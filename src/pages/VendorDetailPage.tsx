@@ -278,6 +278,11 @@ export function VendorDetailPage() {
                       <p className="text-[1.05rem] leading-none text-slate-600">
                         Rp {menuItem.price.toLocaleString('id-ID')}
                       </p>
+                      {menuItem.description ? (
+                        <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                          {menuItem.description}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="ml-auto flex w-24 shrink-0 flex-col items-stretch gap-1.5 self-center">
@@ -317,7 +322,7 @@ export function VendorDetailPage() {
         <MenuModal title="Add menu item" onClose={() => setIsCreateMenuOpen(false)}>
           <MenuItemForm
             title="Add menu item"
-            description="Create menu entries with the latest price for this vendor."
+            description="Create menu entries with the latest price and description for this vendor."
             submitLabel="Add menu item"
             onSubmit={handleCreateMenuItem}
             onCancel={() => setIsCreateMenuOpen(false)}
@@ -333,10 +338,11 @@ export function VendorDetailPage() {
           <MenuItemForm
             key={editingMenuItem.id}
             title={`Edit ${editingMenuItem.name}`}
-            description="Update the latest price or image for this menu item."
+            description="Update the latest price, description, or image for this menu item."
             submitLabel="Save menu changes"
             initialValues={{
               name: editingMenuItem.name,
+              description: editingMenuItem.description,
               price: editingMenuItem.price,
               imagePath: editingMenuItem.imagePath,
             }}

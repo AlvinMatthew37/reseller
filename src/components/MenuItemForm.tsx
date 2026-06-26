@@ -14,6 +14,7 @@ interface MenuItemFormProps {
 
 const emptyValues: MenuItemInput = {
   name: '',
+  description: '',
   price: 0,
   imagePath: null,
 }
@@ -21,6 +22,7 @@ const emptyValues: MenuItemInput = {
 function normalize(values: MenuItemInput): MenuItemInput {
   return {
     name: values.name.trim(),
+    description: values.description.trim(),
     price: Number(values.price),
     imagePath: values.imagePath?.trim() ? values.imagePath.trim() : null,
   }
@@ -145,6 +147,19 @@ export function MenuItemForm({
             />
           </label>
         </div>
+
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          Menu description (optional)
+          <textarea
+            value={values.description}
+            onChange={(event) =>
+              setValues((current) => ({ ...current, description: event.target.value }))
+            }
+            rows={3}
+            className="rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+            placeholder="Example: Crispy rice, spicy sambal, and a fried egg"
+          />
+        </label>
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-3">

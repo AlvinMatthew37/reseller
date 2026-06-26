@@ -16,6 +16,7 @@ export interface MenuItem {
     id: string;
     vendorId: string;
     name: string;
+    description: string;
     price: number;
     imagePath: string | null;
     status: MenuItemStatus;

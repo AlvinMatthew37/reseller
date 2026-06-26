@@ -452,6 +452,11 @@ function DayVendorEditor({
                   </span>
                 </div>
                 <p className="text-xs text-slate-600">Rp {menuItem.price.toLocaleString('id-ID')}</p>
+                {menuItem.description ? (
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500">
+                    {menuItem.description}
+                  </p>
+                ) : null}
               </div>
 
           <button

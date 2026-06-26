@@ -33,6 +33,21 @@ function listExistingTables(db: Database.Database) {
     .all() as { name: string }[]
 }
 
+
+function ensureMenuItemDescriptionColumn(db: Database.Database) {
+  const columns = db
+    .prepare(
+      `
+        PRAGMA table_info(menu_items)
+      `,
+    )
+    .all() as { name: string }[]
+
+  if (!columns.some((column) => column.name === 'description')) {
+    db.exec(`ALTER TABLE menu_items ADD COLUMN description TEXT NOT NULL DEFAULT ''`)
+  }
+}
+
 function upsertSchemaVersion(db: Database.Database) {
   db.prepare(
     `
@@ -58,6 +73,7 @@ export function initializeDatabase(databasePath: string): Database.Database {
     db.exec(statement)
   }
 
+  ensureMenuItemDescriptionColumn(db)
   upsertSchemaVersion(db)
 
   database = db
