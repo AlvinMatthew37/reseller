@@ -517,10 +517,17 @@ function CalendarCell({ day, currentMonth, onOpenDay }: CalendarCellProps) {
   const sunday = getWeekdayIndex(day.date) === 0
   const today = isToday(day.date)
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onOpenDay}
-      className={`flex min-h-[10rem] flex-col rounded-none border-r border-b border-slate-200 p-3 text-left transition ${
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpenDay()
+        }
+      }}
+      className={`flex min-h-[10rem] flex-col rounded-none border-r border-b border-slate-200 p-3 text-left transition cursor-pointer ${
         today
           ? 'bg-emerald-50 ring-2 ring-inset ring-emerald-500'
           : sunday
@@ -561,7 +568,7 @@ function CalendarCell({ day, currentMonth, onOpenDay }: CalendarCellProps) {
           <ScheduledVendorItem key={item.id} item={item} onOpenDay={onOpenDay} />
         ))}
       </div>
-    </button>
+    </div>
   )
 }
 
@@ -579,10 +586,17 @@ function WeekCell({ day, onOpenDay }: WeekCellProps) {
   const inCurrentMonth = month - 1 === fromDateOnly(day.date).getMonth()
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onOpenDay}
-      className={`flex h-full min-h-0 flex-col rounded-3xl border p-4 text-left shadow-sm transition ${today
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpenDay()
+        }
+      }}
+      className={`flex h-full min-h-0 flex-col rounded-3xl border p-4 text-left shadow-sm transition cursor-pointer ${today
         ? 'border-emerald-500 bg-emerald-50'
         : sunday
           ? 'border-slate-200 bg-slate-50'
@@ -621,7 +635,7 @@ function WeekCell({ day, onOpenDay }: WeekCellProps) {
           <ScheduledVendorItem key={item.id} item={item} compact onOpenDay={onOpenDay} />
         ))}
       </div>
-    </button>
+    </div>
   )
 }
 
